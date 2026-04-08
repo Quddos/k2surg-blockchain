@@ -1,24 +1,26 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.28;
 
-import "/contracts/K2SurgRewardNFT.sol";
+import "./K2SurgRewardNFT.sol";
 
 contract K2SurgReward {
+    uint256 public constant REWARD_THRESHOLD = 250;
+
     struct Performance {
         uint score;
         uint transfers;
         uint penalties;
         uint timestamp;
     }
+
+    K2SurgRewardNFT public rewardNFT;
+    mapping(address => Performance[]) public userRecords;
+
+    event PerformanceRecorded(address user, uint score, bool minted);
+
     constructor(address _nftAddress) {
         rewardNFT = K2SurgRewardNFT(_nftAddress);
     }
-
-    K2SurgRewardNFT public rewardNFT;
-
-    mapping(address => Performance[]) public userRecords;
-
-    event PerformanceRecorded(address user, uint score, uint reward);
 
     function recordPerformance(
         uint _score,
@@ -29,20 +31,13 @@ contract K2SurgReward {
             Performance(_score, _transfers, _penalties, block.timestamp)
         );
 
-        uint reward = calculateReward(_score);
-
-        // 🔥 NFT MINT CONDITION
-        if (_score > 200) {
+        bool minted = false;
+        if (_score > REWARD_THRESHOLD) {
             rewardNFT.mintReward(msg.sender);
+            minted = true;
         }
 
-        emit PerformanceRecorded(msg.sender, _score, reward);
-    }
-
-    function calculateReward(uint score) internal pure returns (uint) {
-        if (score > 250) return 10;
-        else if (score > 200) return 5;
-        else return 1;
+        emit PerformanceRecorded(msg.sender, _score, minted);
     }
 
     function getUserRecords(
