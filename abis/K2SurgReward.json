@@ -1,0 +1,167 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_nftAddress",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "score",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "minted",
+        "type": "bool"
+      }
+    ],
+    "name": "PerformanceRecorded",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "REWARD_THRESHOLD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getUserRecords",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "score",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "transfers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "penalties",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct K2SurgReward.Performance[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_score",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_transfers",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_penalties",
+        "type": "uint256"
+      }
+    ],
+    "name": "recordPerformance",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "rewardNFT",
+    "outputs": [
+      {
+        "internalType": "contract K2SurgRewardNFT",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "userRecords",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "score",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "transfers",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "penalties",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
