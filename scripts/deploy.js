@@ -1,18 +1,29 @@
+import "dotenv/config";
 import { network } from "hardhat";
+import { ethers as ethersPkg } from "ethers";
 
 async function main() {
-  const { ethers } = await network.connect();
-  const [deployer, player] = await ethers.getSigners();
+  const connection = await network.connect();
+  const ethers = connection.ethers;
 
-  console.log("Deployer:", await deployer.getAddress());
-  console.log("Player:", await player.getAddress());
+  let signer;
+  if (process.env.PRIVATE_KEY) {
+    signer = new ethersPkg.Wallet(process.env.PRIVATE_KEY, ethers.provider);
+  } else if (ethers.getSigners) {
+    const signers = await ethers.getSigners();
+    signer = signers[0];
+  } else {
+    throw new Error("No signer available. Set PRIVATE_KEY in your .env file.");
+  }
 
-  const NFT = await ethers.getContractFactory("K2SurgRewardNFT");
+  console.log("Signer address:", await signer.getAddress());
+
+  const NFT = await ethers.getContractFactory("K2SurgRewardNFT", signer);
   const nft = await NFT.deploy();
   await nft.waitForDeployment();
   console.log("K2SurgRewardNFT deployed to:", await nft.getAddress());
 
-  const Reward = await ethers.getContractFactory("K2SurgReward");
+  const Reward = await ethers.getContractFactory("K2SurgReward", signer);
   const reward = await Reward.deploy(await nft.getAddress());
   await reward.waitForDeployment();
   console.log("K2SurgReward deployed to:", await reward.getAddress());
@@ -22,7 +33,7 @@ async function main() {
   console.log("Transferred NFT ownership to Reward contract");
 
   const score = 260;
-  const performanceTx = await reward.connect(player).recordPerformance(score, 5, 1);
+  const performanceTx = await reward.recordPerformance(score, 5, 1);
   const performanceReceipt = await performanceTx.wait();
   console.log("recordPerformance tx:", performanceReceipt.transactionHash ?? performanceTx.hash);
 

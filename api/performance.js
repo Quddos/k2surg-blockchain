@@ -1,27 +1,4 @@
-import { readFileSync } from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import { ethers } from "ethers";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const { RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESS } = process.env;
-
-if (!RPC_URL || !PRIVATE_KEY || !CONTRACT_ADDRESS) {
-  throw new Error(
-    "Missing required environment variables: RPC_URL, PRIVATE_KEY, CONTRACT_ADDRESS"
-  );
-}
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const artifactPath = path.join(__dirname, "..", "abis", "K2SurgReward.json");
-const rewardAbi = JSON.parse(readFileSync(artifactPath, "utf-8"));
-
-const provider = new ethers.JsonRpcProvider(RPC_URL);
-const signer = new ethers.Wallet(PRIVATE_KEY, provider);
-const rewardContract = new ethers.Contract(CONTRACT_ADDRESS, rewardAbi, signer);
+import { buildContract } from "./contractHelpers.js";
 
 export const config = {
   runtime: "nodejs",
@@ -60,6 +37,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    const rewardContract = buildContract();
     const tx = await rewardContract.recordPerformance(score, transfers, penalties);
     const receipt = await tx.wait();
 
