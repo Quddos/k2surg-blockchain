@@ -1,0 +1,8 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/health/route": "/api/health",
+  "/api/performance/route": "/api/performance",
+  "/api/status/route": "/api/status",
+  "/page": "/"
+}
