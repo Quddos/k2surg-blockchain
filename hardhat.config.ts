@@ -10,7 +10,7 @@ const {
   RPC_URL_MUMBAI,
   PRIVATE_KEY,
 } = process.env;
-const networks = {};
+const networks: Record<string, any> = {};
 
 const sepoliaUrl = RPC_URL_SEPOLIA || RPC_URL;
 const mumbaiUrl = RPC_URL_MUMBAI || RPC_URL;
