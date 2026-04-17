@@ -22,45 +22,82 @@ export default function DashboardClient() {
   const [performance, setPerformance] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState(null);
+  const [formData, setFormData] = useState({ score: 260, transfers: 5, penalties: 1 });
 
-  useEffect(() => {
-    async function fetchJson(path) {
+  const loadData = async () => {
+    setLoading(true);
+    const nextErrors = {};
+
+    const fetchJson = async (path) => {
       const response = await fetch(path);
       if (!response.ok) {
         const text = await response.text();
         throw new Error(`${response.status} ${text || response.statusText}`);
       }
       return response.json();
+    };
+
+    try {
+      setStatus(await fetchJson("/api/status"));
+    } catch (error) {
+      nextErrors.status = formatError(error);
     }
 
-    async function loadData() {
-      setLoading(true);
-      const nextErrors = {};
-
-      try {
-        setStatus(await fetchJson("/api/status"));
-      } catch (error) {
-        nextErrors.status = formatError(error);
-      }
-
-      try {
-        setHealth(await fetchJson("/api/health"));
-      } catch (error) {
-        nextErrors.health = formatError(error);
-      }
-
-      try {
-        setPerformance(await fetchJson("/api/performance"));
-      } catch (error) {
-        nextErrors.performance = formatError(error);
-      }
-
-      setErrors(nextErrors);
-      setLoading(false);
+    try {
+      setHealth(await fetchJson("/api/health"));
+    } catch (error) {
+      nextErrors.health = formatError(error);
     }
 
+    try {
+      setPerformance(await fetchJson("/api/performance"));
+    } catch (error) {
+      nextErrors.performance = formatError(error);
+    }
+
+    setErrors(nextErrors);
+    setLoading(false);
+  };
+
+  useEffect(() => {
     loadData();
+    const interval = setInterval(loadData, 15000);
+    return () => clearInterval(interval);
   }, []);
+
+  const handleSubmitPerformance = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitResult(null);
+
+    try {
+      const response = await fetch("/api/record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          score: Number(formData.score),
+          transfers: Number(formData.transfers),
+          penalties: Number(formData.penalties),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setSubmitResult({ type: "error", data });
+      } else {
+        setSubmitResult({ type: "success", data });
+        setFormData({ score: 260, transfers: 5, penalties: 1 });
+        setTimeout(loadData, 2000);
+      }
+    } catch (error) {
+      setSubmitResult({ type: "error", data: { error: error.message } });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <main className="page-shell">
@@ -136,10 +173,69 @@ export default function DashboardClient() {
       </div>
 
       <section className="panel card-animate">
+        <h2>Test Performance Recording</h2>
+        <p className="muted" style={{ marginTop: 0 }}>Submit test performance data to the contract:</p>
+        <form onSubmit={handleSubmitPerformance} className="form">
+          <div className="form-group">
+            <label>Score</label>
+            <input
+              type="number"
+              value={formData.score}
+              onChange={(e) => setFormData({ ...formData, score: e.target.value })}
+              disabled={submitting}
+            />
+          </div>
+          <div className="form-group">
+            <label>Transfers</label>
+            <input
+              type="number"
+              value={formData.transfers}
+              onChange={(e) => setFormData({ ...formData, transfers: e.target.value })}
+              disabled={submitting}
+            />
+          </div>
+          <div className="form-group">
+            <label>Penalties</label>
+            <input
+              type="number"
+              value={formData.penalties}
+              onChange={(e) => setFormData({ ...formData, penalties: e.target.value })}
+              disabled={submitting}
+            />
+          </div>
+          <button type="submit" disabled={submitting} className="submit-btn">
+            {submitting ? "Submitting..." : "Submit Performance"}
+          </button>
+        </form>
+
+        {submitResult && (
+          <div className={`submit-result ${submitResult.type}`}>
+            {submitResult.type === "success" ? (
+              <>
+                <p className="success-title">✓ Success!</p>
+                <p className="tx-hash">TX: {submitResult.data.txHash?.slice(0, 20)}...</p>
+                {submitResult.data.event && (
+                  <p className="event-info">Minted: {submitResult.data.event.minted ? "Yes" : "No"}</p>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="error-title">✗ Failed</p>
+                <p className="error-msg">{submitResult.data.error}</p>
+              </>
+            )}
+          </div>
+        )}
+      </section>
+
+      <section className="panel card-animate">
         <h2>Additional details</h2>
-        <p>This dashboard displays real-time data from your K2Surg blockchain contracts.</p>
+        <p>This dashboard displays real-time data from your K2Surg blockchain contracts. Use the form above to test the API.</p>
         <p>
           <strong>Contract Address:</strong> {status?.contractAddress || "Not available"}
+        </p>
+        <p className="muted" style={{ fontSize: "0.9rem", marginTop: "12px" }}>
+          API Endpoints: <code>/api/health</code> • <code>/api/status</code> • <code>/api/record</code>
         </p>
       </section>
 
@@ -201,6 +297,10 @@ export default function DashboardClient() {
           background: rgba(15, 23, 42, 0.9);
           border: 1px solid rgba(148, 163, 184, 0.08);
           box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22);
+          max-width: 1200px;
+          margin-left: auto;
+          margin-right: auto;
+          margin-bottom: 24px;
         }
 
         .panel h2 {
@@ -254,6 +354,118 @@ export default function DashboardClient() {
           min-height: 260px;
         }
 
+        .form {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          gap: 16px;
+          margin-bottom: 18px;
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .form-group label {
+          color: #cbd5e1;
+          font-size: 0.85rem;
+          font-weight: 500;
+          margin-bottom: 6px;
+        }
+
+        .form-group input {
+          background: #0f172a;
+          border: 1px solid rgba(148, 163, 184, 0.12);
+          color: #e2e8f0;
+          padding: 10px 12px;
+          border-radius: 8px;
+          font-size: 0.95rem;
+          transition: all 0.2s ease;
+        }
+
+        .form-group input:focus {
+          outline: none;
+          border-color: #818cf8;
+          box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
+        }
+
+        .form-group input:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .submit-btn {
+          padding: 10px 18px;
+          background: #818cf8;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+          background: #6366f1;
+          box-shadow: 0 8px 20px rgba(129, 140, 248, 0.3);
+        }
+
+        .submit-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .submit-result {
+          margin-top: 16px;
+          padding: 14px 16px;
+          border-radius: 12px;
+          border: 1px solid;
+        }
+
+        .submit-result.success {
+          background: rgba(34, 197, 94, 0.12);
+          border-color: rgba(34, 197, 94, 0.25);
+        }
+
+        .submit-result .success-title {
+          color: #86efac;
+          margin: 0 0 6px;
+          font-weight: 600;
+        }
+
+        .submit-result.error {
+          background: rgba(248, 113, 113, 0.12);
+          border-color: rgba(248, 113, 113, 0.18);
+        }
+
+        .submit-result .error-title {
+          color: #fecaca;
+          margin: 0 0 6px;
+          font-weight: 600;
+        }
+
+        .submit-result p {
+          margin: 0;
+          color: #cbd5e1;
+          font-size: 0.9rem;
+        }
+
+        .tx-hash,
+        .event-info {
+          color: #94a3b8;
+          font-family: monospace;
+          font-size: 0.85rem;
+        }
+
+        code {
+          background: rgba(99, 102, 241, 0.1);
+          color: #c7d2fe;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-family: monospace;
+          font-size: 0.85rem;
+        }
+
         @keyframes fadeInUp {
           from {
             opacity: 0;
@@ -288,6 +500,10 @@ export default function DashboardClient() {
 
           .hero-card {
             padding: 24px;
+          }
+
+          .form {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
