@@ -1,8 +1,4 @@
-import { buildContract, RPC_URL, CONTRACT_ADDRESS } from "./contractHelpers.js";
-
-export const config = {
-  runtime: "nodejs",
-};
+import { buildContract, CONTRACT_ADDRESS } from "../../lib/contractHelpers.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -21,6 +17,7 @@ export default async function handler(req, res) {
       rewardNFT,
     });
   } catch (error) {
+    console.error("status handler failed:", error);
     return res
       .status(500)
       .json({ error: error?.message || "Unable to verify contract status." });

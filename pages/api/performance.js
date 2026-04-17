@@ -1,8 +1,4 @@
-import { buildContract } from "./contractHelpers.js";
-
-export const config = {
-  runtime: "nodejs",
-};
+import { buildContract } from "../../lib/contractHelpers.js";
 
 const setCorsHeaders = (res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -10,7 +6,7 @@ const setCorsHeaders = (res) => {
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization"
   );
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
 };
 
 export default async function handler(req, res) {
@@ -20,8 +16,12 @@ export default async function handler(req, res) {
     return res.status(204).end();
   }
 
+  if (req.method === "GET") {
+    return res.status(200).json([]);
+  }
+
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST is allowed" });
+    return res.status(405).json({ error: "Only GET and POST are allowed" });
   }
 
   const { score, transfers, penalties } = req.body ?? {};

@@ -33,8 +33,8 @@ export default function Dashboard() {
         {status ? (
           <div>
             <p><strong>Contract Address:</strong> {status.contractAddress}</p>
-            <p><strong>Total Rewards:</strong> {status.totalRewards}</p>
-            <p><strong>Total NFTs Minted:</strong> {status.totalNFTs}</p>
+            <p><strong>Reward Threshold:</strong> {status.rewardThreshold}</p>
+            <p><strong>Reward NFT:</strong> {status.rewardNFT}</p>
           </div>
         ) : <p>Loading...</p>}
       </div>
@@ -65,7 +65,7 @@ export default function Dashboard() {
       <div>
         <h2>Additional Details</h2>
         <p>This dashboard displays real-time data from your K2Surg blockchain contracts.</p>
-        <p>Contract Address: {process.env.CONTRACT_ADDRESS}</p>
+        <p>Contract Address: {status?.contractAddress || "Not available"}</p>
       </div>
     </div>
   );
