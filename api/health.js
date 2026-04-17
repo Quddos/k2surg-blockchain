@@ -1,5 +1,5 @@
 export const config = {
-  runtime: "nodejs20.x",
+  runtime: "nodejs18.x",
 };
 
 export default function handler(req, res) {
