@@ -21,3 +21,6 @@
 
 # Local environment variables
 .env
+
+# Next.js build output
+/.next

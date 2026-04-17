@@ -36,7 +36,7 @@ export default function DashboardClient() {
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h1>K2Surg Blockchain Dashboard</h1>
+      <h1>K2Surg Blockchains Dashboard</h1>
 
       <div style={{ marginBottom: "20px" }}>
         <h2>Contract Status</h2>

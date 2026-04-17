@@ -10,7 +10,7 @@ const {
   RPC_URL,
   PRIVATE_KEY,
   CONTRACT_ADDRESS,
-  PORT = 3000,
+  PORT = 3001,
 } = process.env;
 
 if (!RPC_URL || !PRIVATE_KEY || !CONTRACT_ADDRESS) {
@@ -34,6 +34,7 @@ const rewardContract = new ethers.Contract(CONTRACT_ADDRESS, rewardAbi, signer);
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static('.'));
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", network: RPC_URL });
