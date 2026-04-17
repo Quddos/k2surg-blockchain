@@ -1,7 +1,7 @@
 import { buildContract, RPC_URL, CONTRACT_ADDRESS } from "./contractHelpers.js";
 
 export const config = {
-  runtime: "nodejs",
+  runtime: "nodejs20.x",
 };
 
 export default async function handler(req, res) {

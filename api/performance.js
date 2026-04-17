@@ -1,7 +1,7 @@
 import { buildContract } from "./contractHelpers.js";
 
 export const config = {
-  runtime: "nodejs",
+  runtime: "nodejs20.x",
 };
 
 const setCorsHeaders = (res) => {
